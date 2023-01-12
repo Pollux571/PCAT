@@ -24,9 +24,22 @@ app.use(express.json());
 
 //ROUTES
 app.get("/", async (req, res) => {
-  const photos = await Photo.find({})
-  res.render("index",{
-    photos
+  const photos = await Photo.find({});
+  res.render("index", {
+    photos,
+  });
+});
+
+app.post("/photos", async (req, res) => {
+  await Photo.create(req.body);
+  res.redirect("/");
+});
+
+app.get("/photos/:id", async (req, res) => {
+  // console.log(req.params.id);   // https://www.tutorialspoint.com/req-params-property-in-express-js
+  const photo = await Photo.findById(req.params.id);
+  res.render("photo",{
+    photo
   });
 });
 
@@ -35,11 +48,6 @@ app.get("/about", (req, res) => {
 });
 app.get("/add", (req, res) => {
   res.render("add");
-});
-
-app.post("/photos", async (req, res) => {
-  await Photo.create(req.body);
-  res.redirect("/");
 });
 
 const port = 3000;
