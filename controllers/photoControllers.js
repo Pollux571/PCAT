@@ -2,9 +2,18 @@ const Photo = require("../models/Photo");
 const fs = require("fs");
 
 exports.getAllPhotos = async (req, res) => {
-  const photos = await Photo.find({}).sort("-dateCreated");
+  const page = req.query.page || 1;
+  const photosPerPage = 2;
+  const totalPhotos = await Photo.find().countDocuments(); // Veri tabanindaki butun datalari sayar mongo dbdeki
+
+  // console.log(req.query); // sonuclari asagida
+  // // ! http://localhost:3000/?user=test&pass=1234 buraya sorgu gonderdik ve bize consolelog sunu dondu ==>> { user: 'test', pass: '1234' }
+  // // ! http://localhost:3000/?page=3 buraya sorgu gonderdik ve bize consolelog sunu dondu ==>> { page: '3'}
+  const photos = await Photo.find({}).sort("-dateCreated").skip((page - 1) * photosPerPage).limit(photosPerPage);
   res.render("index", {
-    photos,
+    photos:photos,
+    current:page,
+    pages:Math.ceil(totalPhotos / photosPerPage)
   });
 };
 
@@ -34,7 +43,7 @@ exports.createPhoto = async (req, res) => {
   req.files.image.mv(path, async () => {
     photo.image = "/uploads/" + uploadedImageName;
     await photo.save();
-    res.redirect('/');
+    res.redirect("/");
   });
 };
 
